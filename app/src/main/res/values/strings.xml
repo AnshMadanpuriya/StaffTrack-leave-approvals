@@ -1,0 +1,27 @@
+<resources>
+    <string name="app_name">StaffTrack</string>
+    <string name="org_default_name">StrainX Bioworks</string>
+    <string name="auth_tagline">Single-record leave approvals, atomic balances, and HR traceability</string>
+    <string name="auth_sign_in_google">Sign in with Google</string>
+    <string name="auth_sign_out">Sign out</string>
+    <string name="tab_my_leave">My Leave</string>
+    <string name="tab_approvals">Approvals</string>
+    <string name="tab_ai_copilot">AI Copilot</string>
+    <string name="tab_hr_hub">HR Hub</string>
+    <string name="action_request_leave">Request Leave</string>
+    <string name="action_suggest_ai">Suggest with AI</string>
+    <string name="action_submit_request">Submit Request</string>
+    <string name="action_approve">Approve</string>
+    <string name="action_decline">Decline</string>
+    <string name="action_export_csv">Export CSV</string>
+    <string name="action_run_tests">Run All 5 Verification Tests</string>
+    <string name="cd_notifications">Notifications</string>
+    <string name="cd_sign_out">Sign out</string>
+    <string name="cd_request_leave">Create leave request</string>
+    <string name="cd_ai_sparkle">AI leave assistant</string>
+    <string name="cd_copy_invite">Copy workspace invite code</string>
+    <string name="cd_previous_month">Previous month</string>
+    <string name="cd_next_month">Next month</string>
+    <string name="cd_send_message">Send chat message</string>
+    <string name="cd_clear_chat">Clear conversation history</string>
+</resources>

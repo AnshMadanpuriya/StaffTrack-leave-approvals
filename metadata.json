@@ -1,0 +1,6 @@
+{
+  "name": "StaffTrack",
+  "description": "Real-time leave approvals, AI request parsing, and HR absence reporting for StrainX Bioworks.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

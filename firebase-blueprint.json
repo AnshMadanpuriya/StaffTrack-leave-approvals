@@ -1,0 +1,208 @@
+{
+  "entities": {
+    "UserWorkspaceIndex": {
+      "title": "UserWorkspaceIndex",
+      "description": "Maps a signed-in user to their active StrainX Bioworks workspace.",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string", "description": "Firebase Auth UID of the user." },
+        "workspaceId": { "type": "string", "description": "Active workspace identifier." },
+        "workspaceName": { "type": "string", "description": "Display name of the workspace." },
+        "updatedAt": { "type": "string", "format": "date-time", "description": "Server timestamp (FieldValue.serverTimestamp())." }
+      },
+      "required": ["uid", "workspaceId", "workspaceName", "updatedAt"]
+    },
+    "InviteCode": {
+      "title": "InviteCode",
+      "description": "Maps a short uppercase invite code to a workspace ID for joining without enumerating workspaces.",
+      "type": "object",
+      "properties": {
+        "workspaceId": { "type": "string", "description": "Target workspace ID." },
+        "workspaceName": { "type": "string", "description": "Display name of the workspace." },
+        "createdByUid": { "type": "string", "description": "UID of the HR creator." },
+        "createdAt": { "type": "string", "format": "date-time", "description": "Server timestamp (FieldValue.serverTimestamp())." }
+      },
+      "required": ["workspaceId", "workspaceName", "createdByUid", "createdAt"]
+    },
+    "Workspace": {
+      "title": "Workspace",
+      "description": "Organization workspace record for StaffTrack.",
+      "type": "object",
+      "properties": {
+        "name": { "type": "string", "description": "Organization name (e.g., StrainX Bioworks)." },
+        "inviteCode": { "type": "string", "description": "6-character uppercase workspace join code." },
+        "createdByUid": { "type": "string", "description": "UID of the founding HR administrator." },
+        "memberUids": { "type": "array", "description": "Bounded list (max 50) of active workspace member UIDs." },
+        "createdAt": { "type": "string", "format": "date-time", "description": "Server timestamp (FieldValue.serverTimestamp())." },
+        "updatedAt": { "type": "string", "format": "date-time", "description": "Server timestamp (FieldValue.serverTimestamp())." }
+      },
+      "required": ["name", "inviteCode", "createdByUid", "memberUids", "createdAt", "updatedAt"]
+    },
+    "Team": {
+      "title": "Team",
+      "description": "Department or lab team within a workspace.",
+      "type": "object",
+      "properties": {
+        "workspaceId": { "type": "string", "description": "Parent workspace ID." },
+        "name": { "type": "string", "description": "Team display name (e.g., Bioprocess Lab)." },
+        "code": { "type": "string", "description": "Short team code (e.g., BIO)." },
+        "memberUids": { "type": "array", "description": "Denormalized workspace member UIDs for secure list queries." },
+        "createdAt": { "type": "string", "format": "date-time", "description": "Server timestamp (FieldValue.serverTimestamp())." },
+        "updatedAt": { "type": "string", "format": "date-time", "description": "Server timestamp (FieldValue.serverTimestamp())." }
+      },
+      "required": ["workspaceId", "name", "code", "memberUids", "createdAt", "updatedAt"]
+    },
+    "Member": {
+      "title": "Member",
+      "description": "Workspace member profile, role, managed teams, and authoritative leave balances (no PII stored).",
+      "type": "object",
+      "properties": {
+        "workspaceId": { "type": "string", "description": "Parent workspace ID." },
+        "uid": { "type": "string", "description": "Member UID (or synthetic ID for verification tests)." },
+        "displayName": { "type": "string", "description": "Member full name." },
+        "role": { "type": "string", "enum": ["EMPLOYEE", "MANAGER", "HR"], "description": "Workspace RBAC role." },
+        "teamId": { "type": "string", "description": "Assigned team document ID." },
+        "teamName": { "type": "string", "description": "Assigned team display name." },
+        "managedTeamIds": { "type": "array", "description": "Team IDs where this member has approval authority." },
+        "annualDays": { "type": "integer", "description": "Remaining annual leave days." },
+        "sickDays": { "type": "integer", "description": "Remaining sick leave days." },
+        "personalDays": { "type": "integer", "description": "Remaining personal leave days." },
+        "unpaidUsedDays": { "type": "integer", "description": "Cumulative approved unpaid leave days." },
+        "annualAllowance": { "type": "integer", "description": "Annual leave starting quota." },
+        "sickAllowance": { "type": "integer", "description": "Sick leave starting quota." },
+        "personalAllowance": { "type": "integer", "description": "Personal leave starting quota." },
+        "syntheticTestRecord": { "type": "boolean", "description": "True only for isolated verification suite records." },
+        "viewerUids": { "type": "array", "description": "Denormalized workspace member UIDs for secure list queries." },
+        "createdAt": { "type": "string", "format": "date-time", "description": "Server timestamp (FieldValue.serverTimestamp())." },
+        "updatedAt": { "type": "string", "format": "date-time", "description": "Server timestamp (FieldValue.serverTimestamp())." }
+      },
+      "required": [
+        "workspaceId", "uid", "displayName", "role", "teamId", "teamName",
+        "managedTeamIds", "annualDays", "sickDays", "personalDays", "unpaidUsedDays",
+        "annualAllowance", "sickAllowance", "personalAllowance",
+        "syntheticTestRecord", "viewerUids", "createdAt", "updatedAt"
+      ]
+    },
+    "LeaveRequest": {
+      "title": "LeaveRequest",
+      "description": "Single source of truth record for a leave request across Employee, Manager, and HR.",
+      "type": "object",
+      "properties": {
+        "workspaceId": { "type": "string", "description": "Parent workspace ID." },
+        "employeeUid": { "type": "string", "description": "Requesting employee UID." },
+        "employeeName": { "type": "string", "description": "Requesting employee display name." },
+        "teamId": { "type": "string", "description": "Employee team ID at submission time." },
+        "teamName": { "type": "string", "description": "Employee team name." },
+        "leaveType": { "type": "string", "enum": ["ANNUAL", "SICK", "PERSONAL", "UNPAID"], "description": "Category of leave." },
+        "startDate": { "type": "string", "description": "ISO start date YYYY-MM-DD." },
+        "endDate": { "type": "string", "description": "ISO end date YYYY-MM-DD." },
+        "dayCount": { "type": "integer", "description": "Inclusive leave days requested." },
+        "reason": { "type": "string", "description": "Optional employee note." },
+        "aiAssisted": { "type": "boolean", "description": "Whether Gemini AI suggested the fields." },
+        "status": { "type": "string", "enum": ["PENDING", "APPROVED", "DECLINED"], "description": "Current workflow state." },
+        "syntheticTestRecord": { "type": "boolean", "description": "True only for isolated verification suite records." },
+        "viewerUids": { "type": "array", "description": "Denormalized workspace member UIDs for secure list queries." },
+        "submittedAt": { "type": "string", "format": "date-time", "description": "Server timestamp (FieldValue.serverTimestamp())." },
+        "updatedAt": { "type": "string", "format": "date-time", "description": "Server timestamp (FieldValue.serverTimestamp())." },
+        "decidedAt": { "type": "string", "format": "date-time", "description": "Server timestamp when approved or declined." },
+        "decidedByUid": { "type": "string", "description": "UID of manager/HR who decided." },
+        "decidedByName": { "type": "string", "description": "Display name of manager/HR who decided." },
+        "decisionComment": { "type": "string", "description": "Optional manager/HR decision comment." }
+      },
+      "required": [
+        "workspaceId", "employeeUid", "employeeName", "teamId", "teamName",
+        "leaveType", "startDate", "endDate", "dayCount", "reason", "aiAssisted",
+        "status", "syntheticTestRecord", "viewerUids", "submittedAt", "updatedAt"
+      ]
+    },
+    "AuditLog": {
+      "title": "AuditLog",
+      "description": "Immutable decision and balance adjustment ledger for HR traceability.",
+      "type": "object",
+      "properties": {
+        "workspaceId": { "type": "string", "description": "Parent workspace ID." },
+        "requestId": { "type": "string", "description": "Related leave request ID or empty string for manual HR adjustment." },
+        "employeeUid": { "type": "string", "description": "Target employee UID." },
+        "employeeName": { "type": "string", "description": "Target employee display name." },
+        "teamName": { "type": "string", "description": "Employee team name." },
+        "action": { "type": "string", "enum": ["APPROVED", "DECLINED", "BALANCE_ADJUSTED"], "description": "Audit action category." },
+        "leaveType": { "type": "string", "enum": ["ANNUAL", "SICK", "PERSONAL", "UNPAID"], "description": "Affected leave category." },
+        "daysChanged": { "type": "integer", "description": "Signed balance delta." },
+        "balanceBefore": { "type": "integer", "description": "Balance before transaction." },
+        "balanceAfter": { "type": "integer", "description": "Balance after transaction." },
+        "actorUid": { "type": "string", "description": "UID of manager or HR performing the action." },
+        "actorName": { "type": "string", "description": "Display name of actor." },
+        "actorRole": { "type": "string", "enum": ["EMPLOYEE", "MANAGER", "HR"], "description": "Role of actor." },
+        "comment": { "type": "string", "description": "Decision comment or adjustment reason." },
+        "syntheticTestRecord": { "type": "boolean", "description": "True only for isolated verification suite records." },
+        "viewerUids": { "type": "array", "description": "Denormalized workspace member UIDs for secure list queries." },
+        "createdAt": { "type": "string", "format": "date-time", "description": "Server timestamp (FieldValue.serverTimestamp())." }
+      },
+      "required": [
+        "workspaceId", "requestId", "employeeUid", "employeeName", "teamName",
+        "action", "leaveType", "daysChanged", "balanceBefore", "balanceAfter",
+        "actorUid", "actorName", "actorRole", "comment", "syntheticTestRecord",
+        "viewerUids", "createdAt"
+      ]
+    },
+    "Notification": {
+      "title": "Notification",
+      "description": "In-app approval or rejection notice delivered to an employee.",
+      "type": "object",
+      "properties": {
+        "workspaceId": { "type": "string", "description": "Parent workspace ID." },
+        "recipientUid": { "type": "string", "description": "Recipient employee UID." },
+        "requestId": { "type": "string", "description": "Related leave request ID." },
+        "title": { "type": "string", "description": "Notification headline." },
+        "body": { "type": "string", "description": "Summary message including leave dates and comment." },
+        "outcome": { "type": "string", "enum": ["APPROVED", "DECLINED"], "description": "Decision outcome." },
+        "actorUid": { "type": "string", "description": "UID of deciding manager/HR." },
+        "actorName": { "type": "string", "description": "Name of deciding manager/HR." },
+        "comment": { "type": "string", "description": "Decision comment." },
+        "read": { "type": "boolean", "description": "Whether recipient has read this notice." },
+        "syntheticTestRecord": { "type": "boolean", "description": "True only for isolated verification suite records." },
+        "createdAt": { "type": "string", "format": "date-time", "description": "Server timestamp (FieldValue.serverTimestamp())." },
+        "readAt": { "type": "string", "format": "date-time", "description": "Server timestamp when marked read." }
+      },
+      "required": [
+        "workspaceId", "recipientUid", "requestId", "title", "body",
+        "outcome", "actorUid", "actorName", "comment", "read",
+        "syntheticTestRecord", "createdAt"
+      ]
+    }
+  },
+  "firestore": {
+    "/userWorkspaces/{uid}": {
+      "schema": { "$ref": "#/entities/UserWorkspaceIndex" },
+      "description": "Per-user pointer to active workspace ID."
+    },
+    "/inviteCodes/{code}": {
+      "schema": { "$ref": "#/entities/InviteCode" },
+      "description": "Lookup index resolving short workspace invite codes."
+    },
+    "/workspaces/{workspaceId}": {
+      "schema": { "$ref": "#/entities/Workspace" },
+      "description": "Organization workspace root documents."
+    },
+    "/workspaces/{workspaceId}/teams/{teamId}": {
+      "schema": { "$ref": "#/entities/Team" },
+      "description": "Teams inside a workspace."
+    },
+    "/workspaces/{workspaceId}/members/{memberId}": {
+      "schema": { "$ref": "#/entities/Member" },
+      "description": "Workspace members, RBAC roles, managed team IDs, and leave balances."
+    },
+    "/workspaces/{workspaceId}/leaveRequests/{requestId}": {
+      "schema": { "$ref": "#/entities/LeaveRequest" },
+      "description": "Leave requests tracked from submission through approval or decline."
+    },
+    "/workspaces/{workspaceId}/auditLogs/{logId}": {
+      "schema": { "$ref": "#/entities/AuditLog" },
+      "description": "Immutable approval, decline, and HR balance adjustment history."
+    },
+    "/workspaces/{workspaceId}/notifications/{notificationId}": {
+      "schema": { "$ref": "#/entities/Notification" },
+      "description": "In-app notifications delivered to employees on leave decisions."
+    }
+  }
+}
